@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "5dd2a74d-3d00-418e-b286-c1ef1218865a"
+      }
+    },
+    "android": {
+      "package": "com.fyog.cricket_master_killer"
+    },
+    "ios": {
+      "bundleIdentifier": "com.fyog.cmk",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}
