@@ -203,7 +203,7 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
   const renderMarks = (hits) => "✅".repeat(Math.min(hits, 3));
   const valueMap = {
     Bull: 25,
-    Miss: 0, // make Miss worth 0
+    Miss: 25,
     ...Object.fromEntries([...Array(21).keys()].slice(1).map(n => [n, n]))
   };
   const allScoringKeys = [...scoringNumbers, ...otherNumbers];
@@ -264,13 +264,13 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
               updatedPlayers.forEach((p, i) => {
                 if (i !== currentPlayerIndex) {
                   const diff = Math.max(0, 3 - (p.score[scoreKey] || 0));
-                  p.totalScore += valueMap[scoreKey] * extraHits * diff / 2;
+                  p.totalScore += valueMap[scoreKey] * extraHits * diff;
                 }
               });
             } else {
               const diff = Math.max(0, updatedScore[scoreKey] - 3);
               updatedScore[scoreKey] = 3;
-              current.totalScore += valueMap[scoreKey] * diff;
+              current.totalScore += valueMap[scoreKey] * diff / 2;
             }
           }
         } else {
@@ -278,7 +278,7 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
             updatedPlayers.forEach((p, i) => {
               if (i !== currentPlayerIndex) {
                 const diff = Math.max(0, 3 - (p.score[scoreKey] || 0));
-                p.totalScore += valueMap[scoreKey] * diff * mult / 2;
+                p.totalScore += valueMap[scoreKey] * diff * mult;
               }
             });
           } else {
@@ -329,14 +329,18 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
   const handleUndo = () => {
     setHistory(prev => {
       if (prev.length === 0) return prev;
+
       const lastState = prev[prev.length - 1];
+
+      // restore all game state exactly as it was before the last throw
       setPlayers(lastState.players);
       setCurrentPlayerIndex(lastState.currentPlayerIndex);
       setThrowCount(lastState.throwCount);
       setMultiplier(lastState.multiplier);
       setTotalTurns(lastState.totalTurns);
       setRound(lastState.round);
-      return prev.slice(0, -1);
+
+      return prev.slice(0, -1); // remove the undone state from history
     });
   };
 
