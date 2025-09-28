@@ -3,21 +3,17 @@ import dart_board from './dart_board.svg';
 import './App.css';
 import * as motion from "motion/react-client"
 
-
-
 /*
-main function (runs the app)
+main function
 */
 function App() {
 
-  // game states (state variables)
+  // game state variables
   const [step, setStep] = useState('intro');
   const [numPlayers, setNumPlayers] = useState(3); //start with 2 players by default
   const [playerNames, setPlayerNames] = useState([]); //empty player array
   const [finalPlayers, setFinalPlayers] = useState([]);
   const [maxTurns, setMaxTurns] = useState(20); // default 20 rounds
-
-
 
   /* 
   handleStartSetup()
@@ -179,12 +175,11 @@ function App() {
             </div>
           </>
         )}
-
-
       </header>
     </div>
   );
 }
+
 //------------------------------------------------------------------------------------------------------------------
 
 /*
@@ -196,7 +191,6 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
   const scoringNumbers = [20, 19, 18, 17, 16, 15, 'Bull'];
   const otherNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 'Miss'];
   const dropDownNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-
   const [history, setHistory] = useState([]);
   const [round, setRound] = useState(1);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
@@ -204,10 +198,8 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
   const [players, setPlayers] = useState([]);
   const [multiplier, setMultiplier] = useState(1);
   const [totalTurns, setTotalTurns] = useState(0);
-
   const playersRef = useRef(players);
   useEffect(() => { playersRef.current = players; }, [players]);
-
   const renderMarks = (hits) => "✅".repeat(Math.min(hits, 3));
   const valueMap = {
     Bull: 25,
@@ -259,13 +251,15 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
         current.totalScore += valueMap[scoreKey] * mult;
       } else {
 
-        // cricket logic: increment hits and handle extra hits
+        // number hit has not been closed
         if (currentHits < 3) {
           updatedScore[scoreKey] = currentHits + mult;
           const extraHits = Math.max(0, updatedScore[scoreKey] - 3);
+          
+          // extra hits are any hits greater than 3
           if (extraHits > 0) {
 
-            // if opponents still open, award points 
+            // opponents have not closed
             if (othersHaveNotClosed) {
               updatedScore[scoreKey] = 3;
               updatedPlayers.forEach((p, i) => {
@@ -274,13 +268,21 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
                   p.totalScore += valueMap[scoreKey] * extraHits * diff;
                 }
               });
-            } else {
+            } 
+            
+            // oponents have all closed
+            else {
               const diff = Math.max(0, updatedScore[scoreKey] - 3);
               updatedScore[scoreKey] = 3;
               current.totalScore += valueMap[scoreKey] * diff;
             }
           }
-        } else {
+        } 
+        
+        // number hit has been closed
+        else {
+
+          // opponents have not closed
           if (othersHaveNotClosed) {
             updatedPlayers.forEach((p, i) => {
               if (i !== currentPlayerIndex) {
@@ -288,7 +290,10 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
                 p.totalScore += valueMap[scoreKey] * diff * mult;
               }
             });
-          } else {
+          } 
+
+          // oponents have all closed
+          else {
             current.totalScore += valueMap[scoreKey] * mult;
           }
         }
@@ -305,7 +310,7 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
 
       if (newCount >= 3) {
         setCurrentPlayerIndex(prevIndex => {
-          const nextIndex = (prevIndex + 0.5) % players.length;
+          const nextIndex = (prevIndex + 0.5) % players.length; // confused why this works
 
           // if we wrapped back to player 0, increment round
           if (nextIndex === 0) {
@@ -319,27 +324,23 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
               return nextRound;
             });
           }
-
+    
           return nextIndex;
         });
 
-        // reset throws
-        setTotalTurns(prev => prev + 1);
         return 0;
       }
 
-      setTotalTurns(prev => prev + 1);
+      setTotalTurns(prev => prev + 1); // ++
       return newCount;
     });
   };
 
+  // restores game state exactly as it was before the last throw
   const handleUndo = () => {
     setHistory(prev => {
       if (prev.length === 0) return prev;
-
       const lastState = prev[prev.length - 1];
-
-      // restore all game state exactly as it was before the last throw
       setPlayers(lastState.players);
       setCurrentPlayerIndex(lastState.currentPlayerIndex);
       setThrowCount(lastState.throwCount);
@@ -413,7 +414,6 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
           ))}
         </select>
       </div>
-
       <h3> Cricket Numbers:</h3>
       <div className="multiplier-buttons">
         <button onClick={() => handleScoreClick(20, 1)}>Single 20</button>
@@ -442,7 +442,6 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
       <button onClick={() => { handleScoreClick("Miss", 1) }} className="miss"> Miss </button>
       <button onClick={() => { handleScoreClick("Bull", 1) }} className="single-bull"> Single Bull </button>
       <button onClick={() => { handleScoreClick("Bull", 2) }} className="double-bull"> Double Bull </button>
-
       <button className="undo-button" onClick={handleUndo}> Undo </button>
       <button className="restart-button" onClick={onRestart}> Restart Game </button>
       <div className="player-scores">
@@ -453,17 +452,14 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
             <ul>
               {scoringNumbers.map((num) => (
                 <li key={num}>{num}: {renderMarks(player.score[num])}</li>
-
               ))}
             </ul>
           </div>
         ))}
-
       </div>
-
     </div>
   );
 }
-//------------------------------------------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------------------------------------------
 export default App;
