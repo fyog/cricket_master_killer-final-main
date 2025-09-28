@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import dart_board from './dart_board.svg';
 import './App.css';
+import * as motion from "motion/react-client"
+
+
 
 /*
 main function (runs the app)
@@ -13,6 +16,7 @@ function App() {
   const [playerNames, setPlayerNames] = useState([]); //empty player array
   const [finalPlayers, setFinalPlayers] = useState([]);
   const [maxTurns, setMaxTurns] = useState(20); // default 20 rounds
+
 
 
   /* 
@@ -57,7 +61,9 @@ function App() {
           <>
             <h2> CRICKET MASTER KILLER </h2>
             <div className="Dart-board">
-              <img src={dart_board} alt='dart-board' />
+              <motion.div animate={{ rotateY: 360 }} transition={{ duration: 12 }} repeat>
+                <img src={dart_board} alt='dart-board' />
+              </motion.div>
             </div>
             <div className="subheader">
               <div className="dropdown-score">
@@ -84,7 +90,7 @@ function App() {
                   value={maxTurns}
                   onChange={(e) => setMaxTurns(parseInt(e.target.value))}
                 >
-                  {[10, 15, 20, 25, 30].map(r => (
+                  {[5, 10, 15, 20, 25, 30].map(r => (
                     <option key={r} value={r}>{r}</option>
                   ))}
                 </select>
@@ -138,16 +144,15 @@ function App() {
 
         {/*END OF GAME*/}
         {step === 'end' && (
-          <div className="end-screen">
-            <h3>Final Scores:</h3>
-            {finalPlayers
-              .slice()
-              .sort((a, b) => b.totalScore - a.totalScore)
-              .map((player, i) => (
-                <>
-                  <h3>{i === 0 ? "🏆 " : ""}{player.name}</h3>
-                  <div key={i} className='sats2'>
-                    <p><strong>Total Score:</strong> {player.totalScore}</p>
+          <>
+            <h3> Final Scores</h3>
+            <div className="end-screen">
+              {finalPlayers
+                .slice()
+                .sort((a, b) => b.totalScore - a.totalScore)
+                .map((player, i) => (
+                  <div key={i} className="end-card">
+                    <h3>{i === 0 ? "🏆 " : ""}{player.name}</h3>
                     <ul>
                       {["20", "19", "18", "17", "16", "15", "Bull"].map(num => (
                         <li key={num}>
@@ -155,22 +160,26 @@ function App() {
                         </li>
                       ))}
                     </ul>
+                    <p><strong>Total Score:</strong> {player.totalScore}</p>
                   </div>
-                </>
-              ))}
+                ))}
 
-            <button
-              className="button"
-              onClick={() => {
-                setStep('intro');
-                setPlayerNames([]);
-                setFinalPlayers([]);
-              }}
-            >
-              Play Again
-            </button>
-          </div>
+              <div style={{ width: "100%", textAlign: "center", marginTop: "20px" }}>
+                <button
+                  className="button"
+                  onClick={() => {
+                    setStep('intro');
+                    setPlayerNames([]);
+                    setFinalPlayers([]);
+                  }}
+                >
+                  Play Again
+                </button>
+              </div>
+            </div>
+          </>
         )}
+
 
       </header>
     </div>
@@ -194,7 +203,6 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
   const [throwCount, setThrowCount] = useState(0);
   const [players, setPlayers] = useState([]);
   const [multiplier, setMultiplier] = useState(1);
-  const [modifier, setModifier] = useState(1);
   const [totalTurns, setTotalTurns] = useState(0);
 
   const playersRef = useRef(players);
@@ -232,7 +240,6 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
         throwCount,
         totalTurns,
         multiplier: mult,
-        modifier,
         round
       }
     ]);
@@ -270,7 +277,7 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
             } else {
               const diff = Math.max(0, updatedScore[scoreKey] - 3);
               updatedScore[scoreKey] = 3;
-              current.totalScore += valueMap[scoreKey] * diff / 2;
+              current.totalScore += valueMap[scoreKey] * diff;
             }
           }
         } else {
@@ -351,7 +358,11 @@ function ScoringGrid({ playerNames, maxTurns = 20, onRestart, onEndGame }) {
     <div className='subheader container'>
       <div className=".subheader">
         <div className='stats'>
-          <h3>Round: {round}, {currentPlayer?.name}, Throw {throwCount + 1} / 3</h3>
+          <h3>
+            Round {round} / {MAX_TURNS} &nbsp;-&nbsp;
+            {currentPlayer?.name} &nbsp;-&nbsp;
+            Throw {throwCount + 1} / 3
+          </h3>
         </div>
       </div>
       <div>
